@@ -1,0 +1,2140 @@
+
+sCOM            struc ; (sizeof=0x45B1, mappedto_1) ; WriteCmpData+29A/t
+                                        ; FlushBuf+11/t
+distance        dw ?                    ; WriteCmpData+F6/r
+                                        ; WriteCmpData+118/r ...
+out_bytes       dw ?                    ; WriteCmpData+2D/w
+                                        ; WriteCmpData+C5/w ...
+out_bits        dw ?                    ; WriteCmpData+4B/w
+                                        ; WriteCmpData+BE/r ...
+dsize_bits      dw ?                    ; the_implode+3B/w
+                                        ; the_implode:dictsize_4096/w ...
+dsize_mask      dw ?                    ; the_implode+40/w
+                                        ; the_implode+78/w ...
+comtype         dw ?                    ; the_implode+38/w
+                                        ; WriteCmpData+1B/r
+dsize_bytes     dw ?                    ; the_implode+2F/w
+                                        ; WriteCmpData+C/r ...
+dist_bits       db 64 dup(?)            ; the_implode+127/o
+                                        ; WriteCmpData+1C2/r ...
+dist_codes      db 64 dup(?)            ; the_implode+117/o
+                                        ; WriteCmpData+1BE/r ...
+nChBits         db 254 dup(?)           ; the_implode+8E/o
+                                        ; the_implode+B5/w ...
+nChBits0FEh     db 519 dup(?)           ; WriteCmpData+1A2/r
+nChBits305h     db ?                    ; WriteCmpData+AD/r
+nChCodes        dw 254 dup(?)           ; the_implode+9D/o
+                                        ; the_implode+C2/w ...
+nChCodes0FEh    dw 519 dup(?)           ; WriteCmpData+19B/r
+nChCodes305h    dw ?                    ; WriteCmpData+B4/r
+blockread       dd ?                    ; the_implode+16/w
+                                        ; the_implode+1A/w ... ; in: buff, rsize
+                                        ; ret: ax=rsize
+blockwrite      dd ?                    ; the_implode+21/w
+                                        ; the_implode+25/w ...
+phash_to_index  dw 2304 dup(?)          ; _findrep+31/r _findrep+4F/w ...
+                db ? ; undefined
+                db ? ; undefined
+out_buf         db 2048 dup(?)          ; WriteCmpData+1F/w
+                                        ; WriteCmpData+28/w ...
+out_buf0x800    db 2 dup(?)             ; FlushBuf+3D/r
+work_buff       db 516 dup(?)           ; WriteCmpData+220/o
+                                        ; WriteCmpData+294/o ...
+phash_offs      db 8192 dup(?)          ; WriteCmpData+10/o
+                                        ; WriteCmpData+67/o
+size_sCOM       db ?                    ; SortBuffer+4A/o
+sCOM            ends
+
+
+sDEC            struc ; (sizeof=0x311E, mappedto_2) ; GenAscTab+18/t
+                                        ; GenAscTab+32/t ...
+                db ? ; undefined
+                db ? ; undefined
+ctype           dw ?                    ; the_explode+6D/w
+                                        ; the_explode+AC/r ...
+outpos          dw ?                    ; Expand+C/w Expand+27/r ...
+dsizebits       dw ?                    ; the_explode+7F/w
+                                        ; DecodeDist:loc_110/r
+dsizemask       dw ?                    ; the_explode+A8/w
+                                        ; DecodeDist+50/r
+bitbuff         dw ?                    ; the_explode+76/w
+                                        ; DecodeLIT+6/r ...
+extrabits       dw ?                    ; the_explode+83/w
+                                        ; WasteBits+5/r ...
+in_pos          dw ?                    ; the_explode+20/w
+                                        ; the_explode+2E/o ...
+inbytes         dw ?                    ; the_explode+49/w
+                                        ; WasteBits+28/r ...
+blkread         dd ?                    ; the_explode+39/w
+                                        ; the_explode+3D/w ...
+blkwrite        dd ?                    ; the_explode+18/w
+                                        ; the_explode+1C/w ...
+outbuff         db 4096 dup(?)          ; Expand+24/o Expand+45/o ...
+outbuff0x1000   db 4612 dup(?)          ; Expand+72/o Expand+B5/o ; data here for write to file
+inbuff          db ?                    ; the_explode+28/o
+                                        ; the_explode:loc_78/r ...
+inbuff0x1       db ?                    ; the_explode+7A/r
+inbuff0x2       db 2046 dup(?)          ; the_explode+71/r
+field_2A1E      db 256 dup(?)           ; the_explode+12D/o
+                                        ; DecodeDist+E/r
+field_2B1E      db 256 dup(?)           ; the_explode+E9/o
+                                        ; DecodeLIT+29/r
+field_2C1E      db 256 dup(?)           ; DecodeLIT+B5/r
+                                        ; GenAscTab+18/t ...
+field_2D1E      db 256 dup(?)           ; DecodeLIT+E1/r
+                                        ; GenAscTab+32/t
+field_2E1E      db 128 dup(?)           ; DecodeLIT+101/r
+                                        ; GenAscTab+3D/t
+field_2E9E      db 256 dup(?)           ; DecodeLIT+121/r
+                                        ; GenAscTab+48/t
+field_2F9E      db 256 dup(?)           ; the_explode:loc_81/o
+                                        ; DecodeLIT+12E/r ...
+field_309E      db 64 dup(?)            ; the_explode+116/o
+                                        ; the_explode+126/o ...
+field_30DE      db 16 dup(?)            ; the_explode+D2/o
+                                        ; the_explode+E2/o ...
+field_30EE      db 16 dup(?)            ; the_explode+F4/o
+                                        ; DecodeLIT+48/r
+field_30FE      dw 16 dup(?)            ; the_explode+105/o
+                                        ; DecodeLIT+5D/r
+sDEC            ends
+
+
+                .8086
+                .model small
+
+; ===========================================================================
+
+; Segment type: Group
+DGROUP          group _DATA
+
+; ===========================================================================
+
+; Segment type: Pure data
+_DATA           segment word public 'DATA'
+                assume cs:_DATA
+word_2          dw 0                    ; 000108AE↓w FindRep+A↓r ...
+ptrCOM          dd 0                    ; the_implode+B↓w
+                                        ; WriteCmpData+8↓r ...
+ptrDEC          dd ?                    ; the_explode+10↓w Expand+8↓r ...
+data_000A       dw ?                    ; _findrep+F8↓w _findrep+110↓r ...
+data_000C       dw ?                    ; _findrep+F3↓w
+                db 806h dup(?)
+bakSS           dw 0                    ; FindRep↓w FindRep+14↓o ...
+bakSP           dw 0                    ; FindRep+4↓w _findrep+23D↓r ...
+                db 8 dup(?)
+_DATA           ends
+
+; ===========================================================================
+
+; Segment type: Pure code
+PK_TEXT         segment dword private 'CODE'
+                assume cs:PK_TEXT
+                assume es:nothing, ss:nothing, ds:DGROUP
+aPkwareDataComp db 'PKWARE Data Compression Library(tm)',0Dh,0Ah
+                db 'Copyright 1990-91 PKWARE Inc.  All Rights Reserved.',0Dh,0Ah
+                db 'Patent Pending.',0Dh,0Ah
+                db 'Version 1.02',0Dh,0Ah
+                db 0EAh
+
+locret_3:                               ; Implode+8↓p Explode+8↓p
+                retn
+                pop     ax
+                sub     ax, sp
+                mov     word_2, ax      ; ax=0
+                retn
+DistBits        db 2, 2 dup(4), 4 dup(5), 15 dup(6), 26 dup(7), 16 dup(8)
+                                        ; the_implode+12F↓o
+                                        ; the_explode+11B↓o
+DistCode        db 3, 13, 5, 25, 9, 17, 1, 62, 30, 46, 14, 54, 22, 38
+                                        ; the_implode+11C↓o
+                                        ; the_explode+12A↓o
+                db 6, 58, 26, 42, 10, 50, 18, 34, 66, 2, 124, 60, 92, 28
+                db 108, 44, 76, 12, 116, 52, 84, 20, 100, 36, 68, 4, 120
+                db 56, 88, 24, 104, 40, 72, 8, 240, 112, 176, 48, 208
+                db 80, 144, 16, 224, 96, 160, 32, 192, 64, 128, 0
+ExLenBits       db 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8
+                                        ; the_implode:loc_8↓r
+                                        ; the_implode+E8↓r ...
+LenBase         dw 0, 1, 2, 3, 4, 5, 6, 7, 8, 0Ah, 0Eh, 16h, 26h, 46h
+                                        ; the_explode+10A↓o
+                dw 86h, 106h
+LenBits         db 3, 2, 3, 3, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 7, 7
+                                        ; the_implode:loc_9↓r
+                                        ; the_explode+D7↓o
+LenCode         db 5, 3, 1, 6, 0Ah, 2, 0Ch, 14h, 4, 18h, 8, 30h, 10h, 20h
+                                        ; the_implode+F5↓r
+                                        ; the_explode+E6↓o
+                db 40h, 0
+ChBitsAsc       db 0Bh, 8 dup(0Ch), 8, 7, 2 dup(0Ch), 7, 0Ch dup(0Ch)
+                                        ; the_implode:loc_6↓r
+                                        ; the_explode+C3↓o
+                db 0Dh, 5 dup(0Ch), 4, 0Ah, 8, 0Ch, 0Ah, 0Ch, 0Ah, 8, 2 dup(7)
+                db 8, 9, 7, 6, 7, 8, 7, 6, 4 dup(7), 8, 2 dup(7), 2 dup(8)
+                db 0Ch, 0Bh, 7, 9, 0Bh, 0Ch, 6, 7, 2 dup(6), 5, 7, 2 dup(8)
+                db 6, 0Bh, 9, 6, 7, 2 dup(6), 7, 0Bh, 3 dup(6), 7, 9, 8
+                db 2 dup(9), 0Bh, 8, 0Bh, 9, 0Ch, 8, 0Ch, 5, 3 dup(6)
+                db 5, 3 dup(6), 5, 0Bh, 7, 5, 6, 2 dup(5), 6, 0Ah, 4 dup(5)
+                db 8, 7, 2 dup(8), 0Ah, 2 dup(0Bh), 3 dup(0Ch), 30h dup(0Dh)
+                db 30h dup(0Ch), 0Dh, 0Ch, 3 dup(0Dh), 0Ch, 3 dup(0Dh)
+                db 0Ch, 4 dup(0Dh), 0Ch, 3 dup(0Dh), 3 dup(0Ch), 0Bh dup(0Dh)
+ChCodeAsc       dw 490h, 0FE0h, 7E0h, 0BE0h, 3E0h, 0DE0h, 5E0h, 9E0h, 1E0h
+                                        ; the_implode+BB↓r
+                                        ; GenAscTab+F↓r
+                dw 0B8h, 62h, 0EE0h, 6E0h, 22h, 0AE0h, 2E0h, 0CE0h, 4E0h
+                dw 8E0h, 0E0h, 0F60h, 760h, 0B60h, 360h, 0D60h, 560h, 1240h
+                dw 960h, 160h, 0E60h, 660h, 0A60h, 0Fh, 250h, 38h, 260h
+                dw 50h, 0C60h, 390h, 0D8h, 42h, 2, 58h, 1B0h, 7Ch, 29h
+                dw 3Ch, 98h, 5Ch, 9, 1Ch, 6Ch, 2Ch, 4Ch, 18h, 0Ch, 74h
+                dw 0E8h, 68h, 460h, 90h, 34h, 0B0h, 710h, 860h, 31h, 54h
+                dw 11h, 21h, 17h, 14h, 0A8h, 28h, 1, 310h, 130h, 3Eh, 64h
+                dw 1Eh, 2Eh, 24h, 510h, 0Eh, 36h, 16h, 44h, 30h, 0C8h
+                dw 1D0h, 0D0h, 110h, 48h, 610h, 150h, 60h, 88h, 0FA0h
+                dw 7, 26h, 6, 3Ah, 1Bh, 1Ah, 2Ah, 0Ah, 0Bh, 210h, 4, 13h
+                dw 32h, 3, 1Dh, 12h, 190h, 0Dh, 15h, 5, 19h, 8, 78h, 0F0h
+                dw 70h, 290h, 410h, 10h, 7A0h, 0BA0h, 3A0h, 240h, 1C40h
+                dw 0C40h, 1440h, 440h, 1840h, 840h, 1040h, 40h, 1F80h
+                dw 0F80h, 1780h, 780h, 1B80h, 0B80h, 1380h, 380h, 1D80h
+                dw 0D80h, 1580h, 580h, 1980h, 980h, 1180h, 180h, 1E80h
+                dw 0E80h, 1680h, 680h, 1A80h, 0A80h, 1280h, 280h, 1C80h
+                dw 0C80h, 1480h, 480h, 1880h, 880h, 1080h, 80h, 1F00h
+                dw 0F00h, 1700h, 700h, 1B00h, 0B00h, 1300h, 0DA0h, 5A0h
+                dw 9A0h, 1A0h, 0EA0h, 6A0h, 0AA0h, 2A0h, 0CA0h, 4A0h, 8A0h
+                dw 0A0h, 0F20h, 720h, 0B20h, 320h, 0D20h, 520h, 920h, 120h
+                dw 0E20h, 620h, 0A20h, 220h, 0C20h, 420h, 820h, 20h, 0FC0h
+                dw 7C0h, 0BC0h, 3C0h, 0DC0h, 5C0h, 9C0h, 1C0h, 0EC0h, 6C0h
+                dw 0AC0h, 2C0h, 0CC0h, 4C0h, 8C0h, 0C0h, 0F40h, 740h, 0B40h
+                dw 340h, 300h, 0D40h, 1D00h, 0D00h, 1500h, 540h, 500h
+                dw 1900h, 900h, 940h, 1100h, 100h, 1E00h, 0E00h, 140h
+                dw 1600h, 600h, 1A00h, 0E40h, 640h, 0A40h, 0A00h, 1200h
+                dw 200h, 1C00h, 0C00h, 1400h, 400h, 1800h, 800h, 1000h
+                dw 0
+
+; =============== S U B R O U T I N E =======================================
+
+; Attributes: bp-based frame
+
+; int __stdcall __far the_implode(__int32 _a_dictsize, __int32 _a_comtype, __int32 _a_buffer, __int32 _a_blockwrite, __int32 _a_blockread)
+the_implode     proc far                ; Implode+4↓o
+
+var_A           = word ptr -0Ah
+_a_dictsize     = dword ptr  6
+_a_comtype      = dword ptr  0Ah
+_a_buffer       = dword ptr  0Eh
+_a_blockwrite   = dword ptr  12h
+_a_blockread    = dword ptr  16h
+
+; FUNCTION CHUNK AT 04C7 SIZE 00000035 BYTES
+; FUNCTION CHUNK AT 04FD SIZE 0000009C BYTES
+
+                push    bp
+                mov     bp, sp
+                sub     sp, 14h
+                push    di
+                push    si
+                mov     si, word ptr [bp+_a_buffer]
+                mov     word ptr ptrCOM, si
+                push    ds
+                mov     ds, word ptr [bp+_a_buffer+2] ; DS = segment buffer
+                les     ax, [bp+_a_blockread]
+                mov     word ptr [si+sCOM.blockread], ax ; in: buff, rsize
+                                        ; ret: ax=rsize
+                mov     word ptr [si+(sCOM.blockread+2)], es ; in: buff, rsize
+                                        ; ret: ax=rsize
+                les     ax, [bp+_a_blockwrite]
+                mov     word ptr [si+sCOM.blockwrite], ax
+                mov     word ptr [si+(sCOM.blockwrite+2)], es
+                les     di, [bp+_a_dictsize]
+                mov     ax, es:[di]
+                mov     [si+sCOM.dsize_bytes], ax
+                les     bx, [bp+_a_comtype]
+                mov     cx, es:[bx]
+                mov     [si+sCOM.comtype], cx
+                mov     [si+sCOM.dsize_bits], 4
+                mov     [si+sCOM.dsize_mask], 0Fh
+                pop     es
+                mov     word ptr es:ptrCOM+2, ds
+                push    ds
+                pop     es
+                assume es:DGROUP
+                sub     ax, 1024
+                jz      short dictsize_1024
+                sub     ax, 1024
+                jz      short dictsize_2048
+                sub     ax, 2048
+                jz      short dictsize_4096
+                mov     ax, 1
+
+loc_4:                                  ; the_implode+8B↓j
+                mov     bx, seg DGROUP
+                mov     ds, bx
+                jmp     loc_10
+the_implode     endp
+
+                db  90h
+
+; =============== S U B R O U T I N E =======================================
+
+
+                public Implode
+Implode         proc far
+                mov     ax, seg PK_TEXT
+                nop
+                mov     bx, offset the_implode
+                nop
+                call    locret_3
+                jmp     bx
+Implode         endp
+
+; START OF FUNCTION CHUNK FOR the_implode
+
+dictsize_4096:                          ; the_implode+5A↑j
+                inc     [si+sCOM.dsize_bits]
+                or      byte ptr [si+sCOM.dsize_mask], 20h
+
+dictsize_2048:                          ; the_implode+55↑j
+                inc     [si+sCOM.dsize_bits]
+                or      byte ptr [si+sCOM.dsize_mask], 10h
+
+dictsize_1024:                          ; the_implode+50↑j
+                jcxz    short _ModeBinary
+                dec     cx
+                jz      short _ModeASCII
+                mov     ax, 2
+                jmp     short loc_4
+
+_ModeBinary:                            ; the_implode:dictsize_1024↑j
+                cld
+                lea     di, [si+sCOM.nChBits]
+                mov     ax, 909h
+                mov     cx, 128
+                rep stosw               ; ;
+                                        ; ;
+                mov     cx, 256
+                lea     di, [si+sCOM.nChCodes]
+                xor     ax, ax
+
+loc_5:                                  ; the_implode+A6↓j
+                stosw
+                inc     ax
+                inc     ax
+                loop    loc_5
+                jmp     short loc_7
+; END OF FUNCTION CHUNK FOR the_implode
+                db 90h
+; START OF FUNCTION CHUNK FOR the_implode
+
+_ModeASCII:                             ; the_implode+86↑j
+                mov     bx, 255
+
+loc_6:                                  ; the_implode+C9↓j
+                mov     al, cs:ChBitsAsc[bx]
+                inc     al
+                mov     [bx+si+sCOM.nChBits], al
+                shl     bx, 1
+                mov     ax, cs:ChCodeAsc[bx]
+                shl     ax, 1
+                mov     [bx+si+sCOM.nChCodes], ax
+                shr     bx, 1
+                dec     bx
+                jge     short loc_6     ; loop 255 downto -1
+
+loc_7:                                  ; the_implode+A8↑j
+                xor     di, di
+                mov     bx, 256
+
+loc_8:                                  ; the_implode+110↓j
+                mov     cl, cs:ExLenBits[di]
+                mov     dx, 1
+                shl     dx, cl
+                mov     [bp+var_A], dx
+                xor     dx, dx
+
+loc_9:                                  ; the_implode+10A↓j
+                mov     al, cs:LenBits[di]
+                mov     cl, al
+                inc     al
+                add     al, cs:ExLenBits[di]
+                mov     [bx+si+sCOM.nChBits], al
+                mov     ax, dx
+                shl     ax, cl
+                or      al, cs:LenCode[di]
+                shl     ax, 1
+                inc     ax
+                shl     bx, 1
+                mov     [bx+si+sCOM.nChCodes], ax
+                shr     bx, 1
+                inc     bx
+                inc     dx
+                cmp     [bp+var_A], dx
+                ja      short loc_9     ; ;
+                                        ; ;
+                inc     di
+                cmp     di, 16          ; loop 16 times
+                jb      short loc_8     ; ;
+                                        ; ;
+                mov     ax, seg DGROUP
+                mov     ds, ax          ; no need
+                lea     ax, [si+sCOM.dist_codes]
+                push    es
+                push    ax
+                mov     ax, offset DistCode
+                push    cs
+                push    ax
+                mov     ax, 64
+                call    _memcopy        ; src, dest
+                                        ; ax=size
+                lea     ax, [si+sCOM.dist_bits]
+                push    word ptr ptrCOM+2
+                push    ax
+                mov     ax, offset DistBits
+                push    cs
+                push    ax
+                mov     ax, 64
+                call    _memcopy        ; src, dest
+                                        ; ax=size
+                call    WriteCmpData
+                xor     ax, ax
+
+loc_10:                                 ; the_implode+64↑j
+                pop     si
+                pop     di
+                mov     sp, bp
+                pop     bp
+                retf    14h
+; END OF FUNCTION CHUNK FOR the_implode
+                db  90h
+
+; =============== S U B R O U T I N E =======================================
+
+; Attributes: bp-based frame
+
+WriteCmpData    proc near               ; the_implode+13A↑p
+
+v_phase         = word ptr -0Eh
+v_input_data_ended= word ptr -0Ch
+v_bytes_to_load = word ptr -0Ah
+var_8           = word ptr -8
+v_src           = word ptr -6
+var_4           = word ptr -4
+v_total_loaded  = word ptr -2
+
+                push    bp
+                mov     bp, sp
+                sub     sp, 0Eh
+                push    di
+                push    si
+                les     bx, ptrCOM
+                assume es:nothing
+                add     bx, es:[bx+sCOM.dsize_bytes]
+                lea     ax, [bx+sCOM.phash_offs]
+                mov     [bp+v_src], ax
+                mov     bx, word ptr ptrCOM
+                mov     al, byte ptr es:[bx+sCOM.comtype]
+                mov     es:[bx+sCOM.out_buf], al
+                mov     al, byte ptr es:[bx+sCOM.dsize_bits]
+                mov     es:[bx+(sCOM.out_buf+1)], al
+                mov     es:[bx+sCOM.out_bytes], 2 ; output 2 bytes
+                lea     ax, [bx+(sCOM.out_buf+2)]
+                push    es
+                push    ax
+                xor     ax, ax
+                mov     [bp+v_phase], ax
+                mov     [bp+v_input_data_ended], ax
+                mov     dx, 2048
+                call    _memfill        ; src
+                                        ; dx=size
+                les     bx, ptrCOM
+                mov     es:[bx+sCOM.out_bits], 0
+
+loc_11:                                 ; WriteCmpData+2B7↓j
+                mov     [bp+v_bytes_to_load], 4096 ; read 4096 bytes from file
+                xor     si, si
+
+loc_12:                                 ; WriteCmpData+87↓j
+                les     bx, ptrCOM
+                add     bx, es:[bx+sCOM.dsize_bytes]
+                lea     di, [bp+v_bytes_to_load]
+                push    [bp+v_bytes_to_load]
+                push    si
+                lea     bx, [bx+si+sCOM.phash_offs]
+                push    es
+                push    bx
+                push    ss
+                push    di
+                mov     bx, word ptr ptrCOM
+                call    es:[bx+sCOM.blockread] ; in: buff, rsize
+                                        ; ret: ax=rsize
+                pop     si
+                pop     [bp+v_bytes_to_load]
+                mov     di, ax
+                test    di, di
+                jz      short loc_13
+                add     si, di
+                sub     [bp+v_bytes_to_load], di
+                jnz     short loc_12
+                mov     [bp+v_total_loaded], si
+                mov     cx, si
+                jmp     loc_27
+                db  90h
+
+loc_13:                                 ; WriteCmpData+80↑j
+                mov     [bp+v_total_loaded], si
+                mov     cx, si
+                jcxz    short loc_14
+                nop
+                nop
+                jmp     loc_26
+
+loc_14:                                 ; WriteCmpData+97↑j
+                cmp     [bp+v_phase], 0
+                jz      short __Exit    ; __Exit
+                jmp     loc_26
+
+__Exit:                                 ; WriteCmpData+A2↑j
+                                        ; WriteCmpData:loc_36↓j
+                les     bx, ptrCOM      ; __Exit
+                push    es
+                push    bx
+                mov     al, es:[bx+sCOM.nChBits305h]
+                xor     ah, ah
+                mov     dx, es:[bx+sCOM.nChCodes305h]
+                call    OutputBits
+                pop     bx
+                pop     es
+                cmp     es:[bx+sCOM.out_bits], 0
+                jz      short loc_15
+                inc     es:[bx+sCOM.out_bytes]
+
+loc_15:                                 ; WriteCmpData+C3↑j
+                lea     ax, [bx+sCOM.out_buf]
+                push    es
+                push    ax
+                lea     ax, [bx+sCOM.out_bytes]
+                push    es
+                push    ax
+                call    es:[bx+sCOM.blockwrite]
+                pop     si
+                pop     di
+                mov     sp, bp
+                pop     bp
+                retn
+
+loc_16:                                 ; WriteCmpData+287↓j
+                mov     [bp+var_8], di  ; input_data<input_data_end
+
+loc_17:                                 ; WriteCmpData+20D↓j
+                mov     bx, si
+                call    FindRep
+                mov     di, ax
+
+loc_18:                                 ; WriteCmpData+187↓j
+                les     bx, ptrCOM
+                test    di, di
+                jz      short loc_20
+                cmp     di, 2
+                jnz     short loc_19
+                cmp     es:[bx+sCOM.distance], 100h
+                jnb     short loc_20
+
+loc_19:                                 ; WriteCmpData+F4↑j
+                cmp     [bp+v_input_data_ended], 0
+                jz      short loc_21
+                mov     ax, si
+                add     ax, di
+                cmp     ax, [bp+var_8]
+                jbe     short loc_21
+                mov     di, [bp+var_8]
+                sub     di, si
+                cmp     di, 2
+                jb      short loc_20
+                jnz     short _flushrepetition
+                cmp     es:[bx+sCOM.distance], 100h
+                jb      short _flushrepetition
+
+loc_20:                                 ; WriteCmpData+EF↑j
+                                        ; WriteCmpData+FB↑j ...
+                mov     di, bx
+                mov     bl, es:[si]
+                xor     bh, bh
+                mov     al, es:[bx+di+sCOM.nChBits]
+                xor     ah, ah
+                shl     bx, 1
+                mov     dx, es:[bx+di+sCOM.nChCodes]
+                mov     di, 1
+                jmp     loc_25
+                db 90h
+
+loc_21:                                 ; WriteCmpData+101↑j
+                                        ; WriteCmpData+10A↑j
+                cmp     di, 8
+                jnb     short _flushrepetition
+                inc     si
+                cmp     si, [bp+var_8]
+                dec     si
+                jnb     short _flushrepetition
+                mov     ax, es:[bx]
+                mov     [bp+var_4], ax
+                mov     [bp+v_total_loaded], di
+                push    es
+                push    bx
+                lea     bx, [si+1]
+                call    FindRep
+                pop     bx
+                pop     es
+                xchg    ax, di
+                mov     ax, [bp+v_total_loaded]
+                cmp     di, ax
+                jbe     short loc_23
+                inc     ax
+                cmp     ax, di
+                jb      short loc_22
+                cmp     [bp+var_4], 80h
+                jbe     short loc_23
+
+loc_22:                                 ; WriteCmpData+165↑j
+                mov     cl, es:[si]
+                xor     ch, ch
+                add     bx, cx
+                mov     al, es:[bx+sCOM.nChBits]
+                xor     ah, ah
+                add     bx, cx
+                mov     dx, es:[bx+sCOM.nChCodes]
+                call    OutputBits
+                inc     si
+                jmp     loc_18
+
+loc_23:                                 ; WriteCmpData+160↑j
+                                        ; WriteCmpData+16C↑j
+                mov     di, [bp+v_total_loaded]
+                mov     ax, [bp+var_4]
+                mov     es:[bx], ax
+
+_flushrepetition:                       ; WriteCmpData+116↑j
+                                        ; WriteCmpData+11D↑j ...
+                push    es
+                push    bx
+                mov     ax, di          ; di=rep_length
+                shl     ax, 1
+                add     bx, ax
+                mov     dx, es:[bx+sCOM.nChCodes0FEh]
+                pop     bx
+                push    bx
+                mov     al, es:[bx+di+sCOM.nChBits0FEh]
+                xor     ah, ah
+                call    OutputBits
+                pop     bx
+                pop     es
+                cmp     di, 2
+                jnz     short loc_24    ; ;
+                                        ; ;
+                push    es
+                push    bx
+                mov     ax, es:[bx]
+                shr     ax, 1
+                shr     ax, 1
+                add     bx, ax
+                mov     dl, es:[bx+sCOM.dist_codes]
+                mov     al, es:[bx+sCOM.dist_bits]
+                xor     ah, ah
+                xor     dh, dh
+                call    OutputBits
+                pop     bx
+                pop     es
+                mov     dl, es:[bx]
+                and     dx, 3
+                mov     ax, di
+                jmp     short loc_25
+                db  90h
+
+loc_24:                                 ; WriteCmpData+1B1↑j
+                push    es
+                push    bx
+                mov     ax, es:[bx+sCOM.distance]
+                mov     cl, byte ptr es:[bx+sCOM.dsize_bits]
+                shr     ax, cl
+                add     bx, ax
+                mov     dl, es:[bx+sCOM.dist_codes]
+                mov     al, es:[bx+sCOM.dist_bits]
+                xor     ah, ah
+                xor     dh, dh
+                call    OutputBits
+                pop     bx
+                pop     es
+                mov     dx, es:[bx+sCOM.dsize_mask]
+                and     dx, es:[bx+sCOM.distance]
+                mov     ax, es:[bx+sCOM.dsize_bits]
+
+loc_25:                                 ; WriteCmpData+137↑j
+                                        ; WriteCmpData+1D7↑j
+                call    OutputBits
+                add     si, di
+                cmp     [bp+var_8], si
+                jbe     short loc_34
+                jmp     loc_17
+                db 90h
+
+loc_26:                                 ; WriteCmpData+9B↑j
+                                        ; WriteCmpData+A4↑j
+                mov     [bp+v_input_data_ended], 1
+
+loc_27:                                 ; WriteCmpData+8E↑j
+                mov     di, cx
+                les     bx, ptrCOM
+                add     di, es:[bx+sCOM.dsize_bytes]
+                lea     di, [bx+di+sCOM.work_buff]
+                cmp     [bp+v_input_data_ended], 0
+                jz      short loc_28
+                add     di, 204h        ; di=input_data_end
+
+loc_28:                                 ; WriteCmpData+228↑j
+                mov     ax, [bp+v_phase]
+                test    ax, ax
+                jz      short loc_29    ; phase==0
+                dec     ax
+                jz      short loc_31    ; phase==1
+                mov     si, [bp+v_src]
+                lea     ax, [di+1]
+                mov     bx, word ptr ptrCOM
+                mov     cx, es:[bx+sCOM.dsize_bytes]
+                mov     bx, si
+                sub     bx, cx
+                call    SortBuffer
+                jmp     short loc_33
+
+loc_29:                                 ; WriteCmpData+233↑j
+                mov     bx, word ptr ptrCOM ; phase==0
+                cmp     es:[bx+sCOM.dsize_bytes], 1000h
+                jz      short loc_30
+                inc     [bp+v_phase]
+
+loc_30:                                 ; WriteCmpData+259↑j
+                mov     si, [bp+v_src]
+                lea     ax, [di+1]
+                mov     bx, si
+                jmp     short loc_32
+                db 90h
+
+loc_31:                                 ; WriteCmpData+236↑j
+                mov     si, [bp+v_src]  ; phase==1
+                lea     ax, [di+1]
+                mov     bx, word ptr ptrCOM
+                mov     cx, es:[bx+sCOM.dsize_bytes]
+                lea     bx, [si+204h]
+                sub     bx, cx
+
+loc_32:                                 ; WriteCmpData+266↑j
+                call    SortBuffer
+                inc     [bp+v_phase]
+
+loc_33:                                 ; WriteCmpData+24D↑j
+                cmp     di, si
+                jbe     short loc_34
+                jmp     loc_16          ; input_data<input_data_end
+
+loc_34:                                 ; WriteCmpData+20B↑j
+                                        ; WriteCmpData+285↑j
+                cmp     [bp+v_input_data_ended], 0
+                jnz     short loc_35
+                les     bx, ptrCOM
+                lea     ax, [bx+sCOM.work_buff]
+                push    es
+                push    ax
+                lea     ax, [bx+sCOM.work_buff+1000h]
+                push    es
+                push    ax
+                mov     ax, es:[bx+sCOM.dsize_bytes]
+                add     ax, 204h        ; MAX_REP_LENGTH
+                call    _memcopy        ; src, dest
+                                        ; ax=size
+                sub     si, 1000h
+
+loc_35:                                 ; WriteCmpData+28E↑j
+                mov     [bp+v_src], si
+                cmp     [bp+v_input_data_ended], 0
+                jnz     short loc_36
+                jmp     loc_11          ; read 4096 bytes from file
+
+loc_36:                                 ; WriteCmpData+2B5↑j
+                jmp     __Exit          ; __Exit
+WriteCmpData    endp
+
+                db  90h
+
+; =============== S U B R O U T I N E =======================================
+
+
+FindRep         proc near               ; WriteCmpData+E4↑p
+                                        ; WriteCmpData+155↑p
+                mov     bakSS, ss
+                mov     bakSP, sp
+                mov     ax, ds
+                cmp     word_2, 0
+                nop
+                nop
+                cli
+                mov     ss, ax
+                assume ss:DGROUP
+                mov     sp, offset bakSS
+                sti
+                jmp     short _findrep
+                db 90h
+                mov     ss, ax
+                assume ss:nothing
+                mov     sp, offset bakSS
+FindRep         endp
+
+
+; =============== S U B R O U T I N E =======================================
+
+; Attributes: bp-based frame
+
+_findrep        proc near               ; FindRep+18↑j
+
+v_inputdata     = word ptr -10h
+var_E           = word ptr -0Eh
+var_C           = word ptr -0Ch
+v_index         = word ptr -0Ah
+v_phashtoindex  = word ptr -8
+v_len           = word ptr -6
+v_ptr_input     = word ptr -4
+
+                push    bp
+                mov     bp, sp
+                sub     sp, 0Eh
+                push    bx
+                push    di
+                push    si
+                mov     [bp+v_len], 1
+                push    ds              ; !!!!!!!!!!!
+                mov     ds, word ptr ptrCOM+2 ; !!!!! lds si, ptrCOM
+                cld
+                mov     di, bx
+                mov     bl, [di]
+                mov     al, [di+1]
+                xor     bh, bh
+                xor     ah, ah
+                mov     cl, 3
+                shl     bx, cl
+                add     bx, ax
+                shl     bx, 1
+                mov     [bp+v_index], bx
+                pop     es
+                push    es
+                mov     si, word ptr es:ptrCOM
+                mov     bx, [bx+si+sCOM.phash_to_index]
+                mov     [bp+v_phashtoindex], bx
+                sub     di, [si+sCOM.dsize_bytes]
+                inc     di
+                push    ds
+                pop     es
+                assume es:DGROUP
+                cmp     [bx], di        ; di=min_phash_offs
+                jnb     short loc_38
+
+loc_37:                                 ; _findrep+46↓j
+                inc     bx
+                inc     bx
+                cmp     [bx], di
+                jb      short loc_37    ; ;
+                                        ; ;
+                mov     [bp+v_phashtoindex], bx
+                xchg    ax, bx
+                mov     bx, [bp+v_index]
+                mov     [bx+si+sCOM.phash_to_index], ax
+
+loc_38:                                 ; _findrep+40↑j
+                mov     bx, [bp+v_phashtoindex]
+                mov     di, [bx]
+                mov     dx, [bp+v_inputdata]
+                dec     dx
+                cmp     di, dx          ; cmp prev_repetition,repetittion_limit
+                jb      short loc_39
+                xor     ax, ax
+                jmp     _fr_ret
+                db  90h
+
+loc_39:                                 ; _findrep+5E↑j
+                mov     si, [bp+v_inputdata]
+                mov     cx, si
+                mov     [bp+v_ptr_input], si
+                mov     bx, [bp+v_len]
+                dec     bx
+                mov     al, [bx+si]
+                jmp     short loc_45
+
+loc_40:                                 ; _findrep+A0↓j
+                mov     ax, [bp+v_len]
+                cmp     ax, 2
+                jb      short loc_41
+                jmp     _fr_ret
+
+loc_41:                                 ; _findrep+7C↑j
+                xor     ax, ax
+                jmp     _fr_ret
+
+loc_42:                                 ; _findrep+BC↓j _findrep+D0↓j ...
+                mov     bx, [bp+v_len]
+                dec     bx
+                mov     si, [bp+v_ptr_input]
+                mov     al, [bx+si]
+                mov     cx, si
+                nop
+
+loc_43:                                 ; _findrep+A7↓j
+                mov     si, cx
+
+loc_44:                                 ; _findrep+A4↓j
+                mov     di, [bp+v_phashtoindex]
+                inc     di
+                inc     di
+                mov     [bp+v_phashtoindex], di
+                mov     di, [di]
+                cmp     di, dx
+                jnb     short loc_40
+
+loc_45:                                 ; _findrep+74↑j
+                cmp     [bx+di], al
+                jnz     short loc_44
+                cmpsb
+                jnz     short loc_43
+                mov     cx, 202h
+                inc     si
+                inc     di
+                repe cmpsb
+                jz      short loc_46
+                inc     cx
+
+loc_46:                                 ; _findrep+B0↑j
+                sub     cx, 205h
+                not     cx
+                cmp     [bp+v_len], cx
+                ja      short loc_42
+                lea     ax, [si-1]
+                sub     ax, di
+                mov     bx, word ptr ss:ptrCOM
+                mov     [bx+sCOM.distance], ax
+                mov     [bp+v_len], cx
+                cmp     cx, 0Eh
+                jb      short loc_42
+                cmp     cx, 204h        ; MAX_REP_LENGTH
+                jnz     short loc_47
+
+_fm_ret_cx:                             ; _findrep+1F0↓j
+                xchg    ax, cx          ; return ax=0x204 max_rep
+                jmp     _fr_ret
+                db 90h
+
+_fm_ret_vlen:                           ; _findrep+EA↓j _findrep+154↓j ...
+                mov     ax, [bp+v_len]
+                jmp     _fr_ret
+                db  90h
+
+loc_47:                                 ; _findrep+D6↑j
+                mov     bx, [bp+v_phashtoindex]
+                cmp     [bx+2], dx
+                jnb     short _fm_ret_vlen
+                cmp     [bx+4], dx
+                jnb     short loc_42
+                xor     si, si
+                mov     ss:data_000C, si
+                mov     ss:data_000A, 0FFFFh
+                mov     di, 1
+                mov     bx, [bp+v_ptr_input]
+                mov     cx, [bp+v_len]
+
+loc_48:                                 ; _findrep+126↓j
+                mov     al, [bx+di]
+                cmp     [bx+si], al
+                jz      short loc_49
+                shl     si, 1
+                mov     si, ss:data_000A[si]
+                test    si, si
+                jns     short loc_50
+
+loc_49:                                 ; _findrep+10C↑j
+                inc     si
+                inc     di
+                shl     di, 1
+                mov     ss:data_000A[di], si
+                shr     di, 1
+
+loc_50:                                 ; _findrep+117↑j
+                cmp     cx, di
+                ja      short loc_48
+                mov     [bp+var_E], si
+                mov     [bp+var_C], di
+                mov     bx, [bp+v_phashtoindex]
+                mov     di, [bx]
+                add     di, cx
+                inc     di
+
+_fr_loop:                               ; _findrep+1D2↓j
+                                        ; _findrep+1E7↓j ...
+                dec     di
+                mov     si, cx
+                mov     bx, si
+                mov     si, ss:data_000A[bx+si]
+                cmp     si, 0FFFFh
+                jnz     short loc_51
+                inc     si
+
+loc_51:                                 ; _findrep+143↑j
+                                        ; _findrep+15A↓j
+                add     [bp+v_phashtoindex], 2
+                mov     bx, [bp+v_phashtoindex]
+                mov     ax, [bx]
+                mov     [bp+v_index], ax
+                cmp     ax, dx
+                jnb     short _fm_ret_vlen
+                add     ax, si
+                cmp     ax, di
+                jb      short loc_51
+                mov     bx, [bp+v_len]
+                add     bx, [bp+v_index]
+                mov     ax, [bx-2]
+                mov     bx, [bp+v_ptr_input]
+                add     bx, [bp+v_len]
+                cmp     [bx-2], ax
+                jz      short loc_54
+                mov     bx, [bp+v_len]
+                dec     bx
+                dec     bx
+                mov     si, [bp+v_ptr_input]
+
+loc_52:                                 ; _findrep+18E↓j
+                                        ; _findrep+194↓j
+                mov     di, [bp+v_phashtoindex]
+                inc     di
+                inc     di
+                mov     [bp+v_phashtoindex], di
+                mov     di, [di]
+                cmp     di, dx
+                jb      short loc_53
+                jmp     _fm_ret_vlen
+                db  90h
+
+loc_53:                                 ; _findrep+184↑j
+                mov     ax, [bx+di]
+                cmp     [bx+si], ax
+                jnz     short loc_52
+                mov     al, [di]
+                cmp     [si], al
+                jnz     short loc_52
+                mov     cx, 2
+                mov     [bp+v_index], di
+                add     di, cx
+                jmp     short loc_55
+
+loc_54:                                 ; _findrep+16E↑j
+                mov     cx, si
+                mov     ax, [bp+v_index]
+                add     ax, cx
+                cmp     ax, di
+                jz      short loc_55
+                xor     cx, cx
+                mov     di, [bp+v_index]
+
+loc_55:                                 ; _findrep+19E↑j
+                                        ; _findrep+1A9↑j
+                mov     si, [bp+v_ptr_input]
+                add     si, cx
+                sub     cx, 205h
+                not     cx
+                repe cmpsb
+                jz      short loc_56
+                inc     cx
+
+loc_56:                                 ; _findrep+1BD↑j
+                sub     cx, 205h
+                not     cx
+                cmp     cx, 204h        ; MAX_REP_LENGTH
+                jbe     short loc_57
+                nop
+
+loc_57:                                 ; _findrep+1CA↑j
+                cmp     [bp+v_len], cx
+                jbe     short loc_58
+                jmp     _fr_loop
+                db  90h
+
+loc_58:                                 ; _findrep+1D0↑j
+                lea     ax, [si-1]
+                sub     ax, di
+                mov     bx, word ptr ss:ptrCOM
+                mov     [bx], ax
+                cmp     [bp+v_len], cx
+                jb      short loc_59    ; MAX_REP_LENGTH
+                jmp     _fr_loop
+
+loc_59:                                 ; _findrep+1E5↑j
+                cmp     cx, 204h        ; MAX_REP_LENGTH
+                jnz     short loc_60
+                jmp     _fm_ret_cx      ; return ax=0x204 max_rep
+
+loc_60:                                 ; _findrep+1EE↑j
+                mov     [bp+v_len], cx
+
+loc_61:                                 ; _findrep+226↓j
+                mov     si, [bp+v_ptr_input]
+                mov     bx, [bp+var_C]
+                mov     al, [bx+si]
+                mov     bx, [bp+var_E]
+                cmp     [bx+si], al
+                jz      short loc_62
+                shl     bx, 1
+                mov     bx, ss:data_000A[bx]
+                test    bx, bx
+                jns     short loc_63
+
+loc_62:                                 ; _findrep+203↑j
+                inc     bx
+                inc     [bp+var_C]
+                mov     si, [bp+var_C]
+                shl     si, 1
+                mov     ss:data_000A[si], bx
+
+loc_63:                                 ; _findrep+20E↑j
+                mov     [bp+var_E], bx
+                mov     ax, [bp+var_C]
+                cmp     cx, ax
+                ja      short loc_61
+                jmp     _fr_loop
+
+_fr_ret:                                ; _findrep+62↑j _findrep+7E↑j ...
+                pop     ds
+                pop     si
+                pop     di
+                mov     sp, bp
+                pop     bp
+                cmp     word_2, 0
+                nop
+                nop
+                cli
+                mov     ss, bakSS
+                mov     sp, bakSP
+                sti
+                retn
+                mov     ss, bakSS
+                mov     sp, bakSP
+                retn
+_findrep        endp
+
+                db 2 dup(90h)
+
+; =============== S U B R O U T I N E =======================================
+
+; Attributes: bp-based frame
+
+OutputBits      proc near               ; WriteCmpData+B9↑p
+                                        ; WriteCmpData+183↑p ...
+
+v_nbits         = word ptr -4
+v_out_bits      = word ptr -2
+
+                push    bp
+                mov     bp, sp
+                sub     sp, 2
+                push    ax
+                push    di
+                push    si
+                mov     di, dx
+                cmp     ax, 8
+                jbe     short loc_64
+                mov     ax, 8
+                call    OutputBits
+                sub     [bp+v_nbits], 8
+                mov     cl, 8
+                shr     di, cl
+
+loc_64:                                 ; OutputBits+E↑j
+                les     bx, ptrCOM
+                assume es:nothing
+                mov     cx, es:[bx+sCOM.out_bits]
+                mov     [bp+v_out_bits], cx
+                mov     ax, di
+                shl     al, cl
+                mov     si, es:[bx+sCOM.out_bytes]
+                or      es:[bx+si+sCOM.out_buf], al
+                mov     ax, cx
+                add     ax, [bp+v_nbits]
+                mov     es:[bx+sCOM.out_bits], ax
+                cmp     ax, 8
+                jbe     short loc_65
+                inc     si
+                mov     cl, 8
+                sub     cl, byte ptr [bp+v_out_bits]
+                shr     di, cl
+                mov     ax, di
+                mov     es:[bx+si+sCOM.out_buf], al
+                and     es:[bx+sCOM.out_bits], 7
+                jmp     short loc_66
+                db 90h
+
+loc_65:                                 ; OutputBits+42↑j
+                and     es:[bx+sCOM.out_bits], 7
+                jnz     short loc_66
+                inc     si
+
+loc_66:                                 ; OutputBits+58↑j
+                                        ; OutputBits+60↑j
+                mov     es:[bx+sCOM.out_bytes], si
+                cmp     si, 800h
+                jb      short loc_67
+                call    FlushBuf
+
+loc_67:                                 ; OutputBits+6B↑j
+                pop     si
+                pop     di
+                mov     sp, bp
+                pop     bp
+                retn
+OutputBits      endp
+
+                db 90h
+
+; =============== S U B R O U T I N E =======================================
+
+; Attributes: bp-based frame
+
+SortBuffer      proc near               ; WriteCmpData+24A↑p
+                                        ; WriteCmpData:loc_32↑p
+
+var_8           = word ptr -8
+var_6           = word ptr -6
+var_2           = word ptr -2
+
+                push    bp
+                mov     bp, sp
+                sub     sp, 4
+                push    ax
+                push    bx
+                push    di
+                push    si
+                cld
+                mov     si, word ptr ptrCOM ; les si, ptrCOM
+                mov     [bp+var_2], si
+                xor     ax, ax
+                mov     es, word ptr ptrCOM+2
+                mov     cx, 900h
+                lea     di, [si+sCOM.phash_to_index]
+                rep stosw               ; set 0, count 2304 words
+                                        ; ;
+                lea     di, [si+sCOM.phash_to_index]
+                mov     dx, [bp+var_6]
+                mov     si, [bp+var_8]
+                sub     dx, si
+                mov     cl, 3
+                xor     ah, ah
+                push    ds
+                push    es
+                pop     ds
+                nop
+
+loc_68:                                 ; SortBuffer+45↓j
+                lodsb
+                mov     bl, [si]
+                xor     bh, bh
+                xchg    ax, bx
+                shl     bx, cl
+                add     bx, ax
+                shl     bx, 1
+                add     word ptr [bx+di], 2
+                dec     dx
+                jnz     short loc_68    ; ;
+                                        ; ;
+                mov     si, [bp+var_2]
+                lea     ax, [si+sCOM.size_sCOM] ; !!!
+                mov     cx, 480h        ; !!! size phash_to_index/4
+                lea     di, [si+sCOM.phash_to_index]
+
+loc_69:                                 ; SortBuffer+5B↓j
+                add     ax, [di]
+                stosw
+                add     ax, [di]
+                stosw
+                loop    loc_69          ; ;
+                                        ; ;
+                lea     di, [si+sCOM.phash_to_index]
+                mov     dx, [bp+var_6]
+                mov     si, dx
+                sub     dx, [bp+var_8]
+                mov     cl, 3
+                xor     ah, ah
+                std
+                nop
+
+loc_70:                                 ; SortBuffer+82↓j
+                lodsb
+                mov     bl, [si]
+                xor     bh, bh
+                shl     bx, cl
+                add     bx, ax
+                shl     bx, 1
+                sub     word ptr [bx+di], 2
+                mov     bx, [bx+di]
+                mov     [bx], si
+                dec     dx
+                jnz     short loc_70    ; ;
+                                        ; ;
+                cld
+                pop     ds
+                pop     si
+                pop     di
+                mov     sp, bp
+                pop     bp
+                retn
+SortBuffer      endp
+
+                db  90h
+
+; =============== S U B R O U T I N E =======================================
+
+; src, dest
+; ax=size
+; Attributes: bp-based frame
+
+_memcopy        proc near               ; the_implode+124↑p
+                                        ; the_implode+137↑p ...
+
+arg_0           = dword ptr  4
+arg_4           = dword ptr  8
+
+                push    bp
+                mov     bp, sp
+                push    di
+                push    si
+                xchg    ax, cx
+                jcxz    short loc_72
+                push    ds
+                cld
+                lds     si, [bp+arg_0]
+                les     di, [bp+arg_4]
+                test    di, 1
+                jz      short loc_71
+                movsb
+                dec     cx
+
+loc_71:                                 ; _memcopy+14↑j
+                shr     cx, 1
+                rep movsw
+                rcl     cx, 1
+                rep movsb
+                pop     ds
+
+loc_72:                                 ; _memcopy+6↑j
+                pop     si
+                pop     di
+                pop     bp
+                retn    8
+_memcopy        endp
+
+                db  90h
+
+; =============== S U B R O U T I N E =======================================
+
+; src
+; dx=size
+; Attributes: bp-based frame
+
+_memfill        proc near               ; WriteCmpData+44↑p
+                                        ; FlushBuf+56↓p
+
+arg_0           = dword ptr  4
+
+                push    bp
+                mov     bp, sp
+                push    di
+                xchg    cx, dx
+                jcxz    short loc_74
+                les     di, [bp+arg_0]
+                mov     ah, al
+                test    di, 1
+                jz      short loc_73
+                stosb
+                dec     cx
+
+loc_73:                                 ; _memfill+11↑j
+                shr     cx, 1
+                rep stosw
+                rcl     cx, 1
+                rep stosb
+
+loc_74:                                 ; _memfill+6↑j
+                pop     di
+                pop     bp
+                retn    4
+_memfill        endp
+
+                db 90h
+
+; =============== S U B R O U T I N E =======================================
+
+; Attributes: bp-based frame
+
+FlushBuf        proc near               ; OutputBits+6D↑p
+
+var_4           = word ptr -4
+var_2           = byte ptr -2
+var_1           = byte ptr -1
+
+                push    bp
+                mov     bp, sp
+                sub     sp, 4
+                push    si
+                mov     [bp+var_4], 2048 ; write 2048 bytes
+                push    si
+                push    di
+                mov     ax, word ptr ptrCOM
+                add     ax, offset sCOM.out_buf ; ;???????????????????????????
+                push    word ptr ptrCOM+2
+                push    ax
+                lea     ax, [bp+var_4]
+                push    ss
+                push    ax
+                les     bx, ptrCOM
+                call    es:[bx+sCOM.blockwrite]
+                pop     di
+                pop     si
+                les     bx, ptrCOM
+                add     bx, es:[bx+sCOM.out_bytes]
+                mov     al, es:[bx+sCOM.out_buf]
+                mov     [bp+var_1], al
+                mov     bx, word ptr ptrCOM
+                mov     al, es:[bx+sCOM.out_buf0x800]
+                mov     [bp+var_2], al
+                sub     es:[bx+sCOM.out_bytes], 2048
+                lea     ax, [bx+sCOM.out_buf]
+                push    es
+                push    ax
+                xor     ax, ax
+                mov     dx, 802h
+                call    _memfill        ; src
+                                        ; dx=size
+                les     bx, ptrCOM
+                cmp     es:[bx+sCOM.out_bytes], 0
+                jnz     short loc_75
+                mov     si, bx
+                jmp     short loc_76
+                db  90h
+
+loc_75:                                 ; FlushBuf+62↑j
+                mov     si, bx
+                mov     al, [bp+var_2]
+                mov     es:[si+sCOM.out_buf], al
+
+loc_76:                                 ; FlushBuf+66↑j
+                cmp     es:[si+sCOM.out_bits], 0
+                jz      short loc_77
+                mov     bx, es:[si+sCOM.out_bytes]
+                add     bx, si
+                mov     al, [bp+var_1]
+                mov     es:[bx+sCOM.out_buf], al
+
+loc_77:                                 ; FlushBuf+78↑j
+                pop     si
+                mov     sp, bp
+                pop     bp
+                retn
+FlushBuf        endp
+
+
+; =============== S U B R O U T I N E =======================================
+
+; Attributes: bp-based frame
+
+the_explode     proc far                ; Explode+4↓o
+
+a_buff          = dword ptr  6
+a_blkwrite      = dword ptr  0Ah
+a_blkread       = dword ptr  0Eh
+
+; FUNCTION CHUNK AT 0D08 SIZE 000000DE BYTES
+; FUNCTION CHUNK AT 0DE7 SIZE 0000000D BYTES
+
+                push    bp
+                mov     bp, sp
+                push    si
+                push    di
+                mov     ax, word ptr [bp+a_blkwrite]
+                mov     dx, word ptr [bp+a_blkwrite+2]
+                les     si, [bp+a_buff]
+                mov     di, es
+                mov     word ptr ptrDEC, si
+                mov     word ptr ptrDEC+2, es
+                mov     word ptr es:[si+sDEC.blkwrite], ax
+                mov     word ptr es:[si+(sDEC.blkwrite+2)], dx
+                mov     es:[si+sDEC.in_pos], 2048 ; read 2048 bytes
+                push    si
+                push    di
+                lea     ax, [si+sDEC.inbuff]
+                push    es
+                push    ax
+                lea     ax, [si+sDEC.in_pos]
+                push    es
+                push    ax
+                mov     ax, word ptr [bp+a_blkread]
+                mov     dx, word ptr [bp+a_blkread+2]
+                mov     word ptr es:[si+sDEC.blkread], ax
+                mov     word ptr es:[si+(sDEC.blkread+2)], dx
+                call    es:[si+sDEC.blkread]
+                pop     di
+                pop     si
+                mov     es, di
+                mov     es:[si+sDEC.inbytes], ax
+                cmp     ax, 4
+                ja      short loc_78
+                mov     ax, 3
+                jmp     loc_85
+the_explode     endp
+
+                db  90h
+
+; =============== S U B R O U T I N E =======================================
+
+
+                public Explode
+Explode         proc far
+                mov     ax, seg PK_TEXT
+                nop
+                mov     bx, offset the_explode
+                nop
+                call    locret_3
+                jmp     bx
+Explode         endp
+
+; START OF FUNCTION CHUNK FOR the_explode
+
+loc_78:                                 ; the_explode+50↑j
+                mov     al, es:[si+sDEC.inbuff]
+                xor     ah, ah
+                mov     es:[si+sDEC.ctype], ax
+                mov     al, es:[si+sDEC.inbuff0x2]
+                mov     es:[si+sDEC.bitbuff], ax
+                mov     al, es:[si+sDEC.inbuff0x1]
+                mov     es:[si+sDEC.dsizebits], ax
+                mov     es:[si+sDEC.extrabits], 0
+                mov     es:[si+sDEC.in_pos], 3 ; Position in input buffer
+                cmp     ax, 4
+                jnb     short loc_79
+                jmp     loc_84
+
+loc_79:                                 ; the_explode+92↑j
+                cmp     ax, 6
+                jbe     short loc_80    ; dsizebits in [4..6]
+                jmp     loc_84
+
+loc_80:                                 ; the_explode+9A↑j
+                mov     cl, 16          ; dsizebits in [4..6]
+                sub     cl, al
+                mov     ax, 0FFFFh
+                shr     ax, cl          ; cl=10..12
+                mov     es:[si+sDEC.dsizemask], ax
+                mov     ax, es:[si+sDEC.ctype]
+                test    ax, ax
+                jz      short _ex_binmod ; BINARY DeCompress
+                dec     ax
+                jz      short loc_81    ; Ascii mode
+                mov     ax, 2
+                jmp     loc_85
+
+loc_81:                                 ; the_explode+B5↑j
+                lea     ax, [si+sDEC.field_2F9E] ; Ascii mode
+                push    es
+                push    ax
+                mov     ax, offset ChBitsAsc
+                push    cs
+                push    ax
+                mov     ax, 256
+                call    _memcopy        ; src, dest
+                                        ; ax=size
+                call    GenAscTab
+
+_ex_binmod:                             ; the_explode+B2↑j
+                push    di              ; BINARY DeCompress
+                lea     ax, [si+sDEC.field_30DE]
+                push    ax
+                mov     ax, offset LenBits
+                push    cs
+                push    ax
+                mov     ax, 16
+                call    _memcopy        ; src, dest
+                                        ; ax=size
+                lea     bx, [si+sDEC.field_30DE]
+                mov     cx, offset LenCode
+                lea     dx, [si+sDEC.field_2B1E]
+                mov     ax, 16
+                call    GenDecodeTab
+                push    di
+                lea     ax, [si+sDEC.field_30EE]
+                push    ax
+                mov     ax, offset ExLenBits
+                push    cs
+                push    ax
+                mov     ax, 16
+                call    _memcopy        ; src, dest
+                                        ; ax=size
+                push    di
+                lea     ax, [si+sDEC.field_30FE]
+                push    ax
+                mov     ax, offset LenBase
+                push    cs
+                push    ax
+                mov     ax, 32
+                call    _memcopy        ; src, dest
+                                        ; ax=size
+                push    di
+                lea     ax, [si+sDEC.field_309E]
+                push    ax
+                mov     ax, offset DistBits
+                push    cs
+                push    ax
+                mov     ax, 64
+                call    _memcopy        ; src, dest
+                                        ; ax=size
+                lea     bx, [si+sDEC.field_309E]
+                mov     cx, offset DistCode
+                lea     dx, [si+sDEC.field_2A1E]
+                mov     ax, 64
+                call    GenDecodeTab
+                call    Expand
+                cmp     ax, 306h
+                jnz     short loc_83
+                mov     ax, 4
+                jmp     short loc_85
+; END OF FUNCTION CHUNK FOR the_explode
+                db 90h
+; START OF FUNCTION CHUNK FOR the_explode
+
+loc_83:                                 ; the_explode+13D↑j
+                xor     ax, ax
+                jmp     short loc_85
+
+loc_84:                                 ; the_explode+94↑j
+                                        ; the_explode+9C↑j
+                mov     ax, 1
+
+loc_85:                                 ; the_explode+55↑j
+                                        ; the_explode+BA↑j ...
+                pop     di
+                pop     si
+                pop     bp
+                retf    0Ch
+; END OF FUNCTION CHUNK FOR the_explode
+                db 90h
+
+; =============== S U B R O U T I N E =======================================
+
+; Attributes: bp-based frame
+
+Expand          proc near               ; the_explode+137↑p
+
+var_2           = word ptr -2
+
+                push    bp
+                mov     bp, sp
+                sub     sp, 2
+                push    si
+                push    di
+                les     si, ptrDEC
+                mov     es:[si+sDEC.outpos], 1000h
+
+loc_86:                                 ; Expand+69↓j Expand+9F↓j
+                push    es
+                call    DecodeLIT
+                pop     es
+                cmp     ax, 305h
+                jb      short loc_87
+                jmp     loc_91
+
+loc_87:                                 ; Expand+1A↑j
+                cmp     ax, 100h
+                jnb     short loc_88
+                lea     bx, [si+sDEC.outbuff]
+                mov     di, es:[si+sDEC.outpos]
+                mov     es:[bx+di], al
+                inc     di
+                mov     es:[si+sDEC.outpos], di
+                jmp     short loc_89
+
+loc_88:                                 ; Expand+22↑j
+                sub     ax, 0FEh
+                mov     di, ax          ; di=rep_length
+                push    es
+                call    DecodeDist
+                pop     es
+                test    ax, ax
+                jz      short loc_90
+                mov     cx, di
+                lea     bx, [si+sDEC.outbuff]
+                mov     di, es:[si+sDEC.outpos]
+                add     di, bx
+                mov     dx, si
+                mov     si, di
+                sub     si, ax
+                cld
+                push    ds
+                mov     ax, es
+                mov     ds, ax
+                rep movsb
+                pop     ds
+                mov     si, dx
+                sub     di, bx
+                mov     es:[si+sDEC.outpos], di
+
+loc_89:                                 ; Expand+33↑j
+                cmp     di, 2000h
+                jb      short loc_86    ; ;
+                                        ; ;
+                mov     [bp+var_2], 4096 ; write 4096 bytes
+                push    si
+                push    di
+                lea     ax, [si+sDEC.outbuff0x1000] ; data here for write to file
+                push    es
+                push    ax
+                lea     ax, [bp+var_2]
+                push    ss
+                push    ax
+                call    es:[si+sDEC.blkwrite]
+                pop     di
+                pop     si              ; ;
+                                        ; ;
+                mov     es, word ptr ptrDEC+2
+                lea     ax, [si+sDEC.outbuff]
+                push    es
+                push    ax
+                add     ax, 4096
+                push    es
+                push    ax
+                mov     ax, es:[si+sDEC.outpos]
+                sub     ax, 4096
+                mov     es:[si+sDEC.outpos], ax
+                call    _memcopy        ; src, dest
+                                        ; ax=size
+                jmp     loc_86
+                db  90h
+
+loc_90:                                 ; Expand+41↑j
+                mov     [bp+var_2], 306h
+
+loc_91:                                 ; Expand+1C↑j
+                push    [bp+var_2]
+                mov     ax, es:[si+sDEC.outpos]
+                sub     ax, 4096
+                mov     [bp+var_2], ax
+                lea     ax, [si+sDEC.outbuff0x1000] ; data here for write to file
+                push    es
+                push    ax
+                lea     ax, [bp+var_2]
+                push    ss
+                push    ax
+                call    es:[si+sDEC.blkwrite]
+                pop     ax
+                pop     di
+                pop     si
+                mov     sp, bp
+                pop     bp
+                retn
+Expand          endp
+
+
+; =============== S U B R O U T I N E =======================================
+
+
+DecodeLIT       proc near               ; Expand+13↑p
+                push    di
+                push    si
+                les     bx, ptrDEC
+                test    byte ptr es:[bx+sDEC.bitbuff], 1
+                jz      short loc_94
+                mov     ax, 1
+                call    WasteBits
+                test    ax, ax
+                jz      short loc_92
+
+_dl_ret_306:                            ; DecodeLIT+42↓j
+                                        ; DecodeLIT+6B↓j ...
+                mov     ax, 306h
+                jmp     loc_106
+
+loc_92:                                 ; DecodeLIT+15↑j
+                les     bx, ptrDEC
+                mov     si, es:[bx+sDEC.bitbuff]
+                and     si, 0FFh
+                mov     al, es:[bx+si+sDEC.field_2B1E]
+                xor     ah, ah
+                mov     di, ax
+                lea     si, [bx+sDEC.field_30DE]
+                mov     bx, ax
+                mov     al, es:[bx+si]
+                xor     ah, ah
+                call    WasteBits
+                test    ax, ax
+                jnz     short _dl_ret_306
+                les     bx, ptrDEC
+                mov     cl, es:[bx+di+sDEC.field_30EE]
+                test    cl, cl
+                jz      short loc_93
+                mov     si, 1
+                shl     si, cl
+                dec     si
+                and     si, es:[bx+sDEC.bitbuff]
+                shl     di, 1
+                add     si, es:[bx+di+sDEC.field_30FE]
+                mov     al, cl
+                xor     ah, ah
+                call    WasteBits
+                test    ax, ax
+                jnz     short _dl_ret_306
+                mov     di, si
+
+loc_93:                                 ; DecodeLIT+4F↑j
+                add     di, 100h
+                jmp     _dl_ret_di
+                db 90h
+
+loc_94:                                 ; DecodeLIT+B↑j
+                mov     ax, 1
+                call    WasteBits
+                test    ax, ax
+                jz      short loc_95
+                jmp     short _dl_ret_306
+
+loc_95:                                 ; DecodeLIT+7F↑j
+                les     si, ptrDEC
+                cmp     es:[si+sDEC.ctype], ax
+                jnz     short loc_98
+                mov     bx, si
+                mov     di, es:[bx+sDEC.bitbuff]
+                and     di, 0FFh
+                mov     ax, 8
+
+loc_96:                                 ; DecodeLIT+135↓j
+                call    WasteBits
+                test    ax, ax
+                jnz     short loc_97
+                jmp     _dl_ret_di
+
+loc_97:                                 ; DecodeLIT+9F↑j
+                jmp     _dl_ret_306
+
+loc_98:                                 ; DecodeLIT+8B↑j
+                mov     al, byte ptr es:[si+sDEC.bitbuff]
+                xor     ah, ah
+                test    ax, ax
+                jz      short loc_102
+                mov     bx, si
+                add     bx, ax
+                mov     al, es:[bx+sDEC.field_2C1E]
+                mov     di, ax
+                cmp     ax, 0FFh
+                jnz     short loc_105
+                test    byte ptr es:[si+sDEC.bitbuff], 3Fh
+                jz      short loc_100
+                mov     ax, 4
+                call    WasteBits
+                test    ax, ax
+                jz      short loc_99
+                jmp     _dl_ret_306
+
+loc_99:                                 ; DecodeLIT+D0↑j
+                les     bx, ptrDEC
+                mov     si, es:[bx+sDEC.bitbuff]
+                and     si, 0FFh
+                mov     di, word ptr es:[bx+si+sDEC.field_2D1E]
+                jmp     short loc_104
+
+loc_100:                                ; DecodeLIT+C6↑j
+                mov     ax, 6
+                call    WasteBits
+                test    ax, ax
+                jz      short loc_101
+                jmp     _dl_ret_306
+                db  90h
+
+loc_101:                                ; DecodeLIT+F0↑j
+                les     bx, ptrDEC
+                mov     si, es:[bx+sDEC.bitbuff]
+                and     si, 7Fh
+                mov     di, word ptr es:[bx+si+sDEC.field_2E1E]
+                jmp     short loc_104
+
+loc_102:                                ; DecodeLIT+AF↑j
+                mov     ax, 8
+                call    WasteBits
+                test    ax, ax
+                jz      short loc_103
+                jmp     _dl_ret_306
+
+loc_103:                                ; DecodeLIT+110↑j
+                les     bx, ptrDEC
+                mov     si, es:[bx+sDEC.bitbuff]
+                and     si, 0FFh
+                mov     di, word ptr es:[bx+si+sDEC.field_2E9E]
+
+loc_104:                                ; DecodeLIT+E6↑j
+                                        ; DecodeLIT+106↑j
+                and     di, 0FFh
+
+loc_105:                                ; DecodeLIT+BF↑j
+                mov     bx, word ptr ptrDEC
+                mov     al, es:[bx+di+sDEC.field_2F9E]
+                xor     ah, ah
+                jmp     loc_96
+
+_dl_ret_di:                             ; DecodeLIT+73↑j
+                                        ; DecodeLIT+A1↑j
+                mov     ax, di
+
+loc_106:                                ; DecodeLIT+1A↑j
+                pop     si
+                pop     di
+                retn
+DecodeLIT       endp
+
+                db  90h
+
+; =============== S U B R O U T I N E =======================================
+
+
+DecodeDist      proc near               ; Expand+3B↑p
+                push    di
+                push    si
+                mov     di, ax
+                les     si, ptrDEC
+                mov     bl, byte ptr es:[si+sDEC.bitbuff]
+                xor     bh, bh
+                mov     bl, es:[bx+si+sDEC.field_2A1E]
+                xor     bh, bh
+                xchg    bx, si
+                mov     al, es:[bx+si+sDEC.field_309E]
+                xor     ah, ah
+                call    WasteBits
+                test    ax, ax
+                jz      short loc_108
+
+loc_107:                                ; DecodeDist+48↓j
+                xor     ax, ax
+                jmp     short loc_112
+
+loc_108:                                ; DecodeDist+23↑j
+                les     bx, ptrDEC
+                cmp     di, 2
+                jnz     short loc_110
+                shl     si, 1
+                shl     si, 1
+                mov     al, byte ptr es:[bx+sDEC.bitbuff]
+                and     ax, 3
+                or      si, ax
+                mov     ax, di
+
+loc_109:                                ; DecodeDist+5E↓j
+                call    WasteBits
+                test    ax, ax
+                jz      short loc_111
+                jmp     short loc_107
+
+loc_110:                                ; DecodeDist+30↑j
+                mov     cl, byte ptr es:[bx+sDEC.dsizebits]
+                shl     si, cl
+                mov     ax, es:[bx+sDEC.dsizemask]
+                and     ax, es:[bx+sDEC.bitbuff]
+                or      si, ax
+                mov     al, cl
+                xor     ch, ch
+                jmp     short loc_109
+                db 90h
+
+loc_111:                                ; DecodeDist+46↑j
+                xchg    ax, si
+                inc     ax
+
+loc_112:                                ; DecodeDist+27↑j
+                pop     si
+                pop     di
+                retn
+DecodeDist      endp
+
+                db 2 dup(90h)
+
+; =============== S U B R O U T I N E =======================================
+
+
+WasteBits       proc near               ; DecodeLIT+10↑p
+                                        ; DecodeLIT+3D↑p ...
+                xchg    ax, cx
+                les     bx, ptrDEC
+                mov     ch, byte ptr es:[bx+sDEC.extrabits]
+                cmp     ch, cl
+                jb      short loc_113
+                shr     es:[bx+sDEC.bitbuff], cl
+                sub     ch, cl
+                mov     byte ptr es:[bx+sDEC.extrabits], ch
+                xor     ax, ax
+                retn
+
+loc_113:                                ; WasteBits+B↑j
+                push    di
+                push    si
+                mov     si, bx
+                xchg    ch, cl
+                shr     es:[si+sDEC.bitbuff], cl
+                mov     di, es:[si+sDEC.in_pos]
+                cmp     es:[si+sDEC.inbytes], di
+                ja      short loc_114
+                mov     es:[si+sDEC.in_pos], 2048
+                push    cx
+                push    si
+                push    di
+                lea     ax, [si+sDEC.inbuff]
+                push    es
+                push    ax
+                lea     ax, [si+sDEC.in_pos]
+                push    es
+                push    ax
+                call    es:[si+sDEC.blkread]
+                pop     di
+                pop     si
+                pop     cx
+                mov     es, word ptr ptrDEC+2
+                mov     es:[si+sDEC.inbytes], ax
+                test    ax, ax
+                mov     ax, 1
+                jz      short loc_115
+                xor     di, di
+
+loc_114:                                ; WasteBits+2C↑j
+                mov     bx, di
+                mov     ah, es:[bx+si+sDEC.inbuff]
+                xor     al, al
+                or      es:[si+sDEC.bitbuff], ax
+                inc     di
+                sub     ch, cl
+                mov     cl, ch
+                shr     es:[si+sDEC.bitbuff], cl
+                sub     cl, 8
+                neg     cl
+                mov     byte ptr es:[si+sDEC.extrabits], cl
+                xor     ax, ax
+                mov     es:[si+sDEC.in_pos], di
+
+loc_115:                                ; WasteBits+56↑j
+                pop     si
+                pop     di
+                retn
+WasteBits       endp
+
+                db 90h
+
+; =============== S U B R O U T I N E =======================================
+
+
+GenDecodeTab    proc near               ; the_explode+F0↑p
+                                        ; the_explode+134↑p
+                push    bp
+                push    di
+                push    si
+                mov     es, word ptr ptrDEC+2
+                mov     si, cx
+                mov     di, dx
+                mov     dx, bx
+                mov     bx, ax
+                dec     bx
+
+_gd_loop_1:                             ; GenDecodeTab+2F↓j
+                add     bx, dx
+                mov     cl, es:[bx]
+                sub     bx, dx
+                mov     ax, 1
+                shl     ax, cl
+                mov     bp, cs:[bx+si]
+                and     bp, 0FFh
+
+_gd_loop_2:                             ; GenDecodeTab+2C↓j
+                mov     es:[bp+di], bl
+                add     bp, ax
+                cmp     bp, 0FFh
+                jbe     short _gd_loop_2 ; ;
+                                        ; ;
+                dec     bx
+                jge     short _gd_loop_1 ; ;
+                                        ; ;
+                pop     si
+                pop     di
+                pop     bp
+                retn
+GenDecodeTab    endp
+
+                db 90h
+
+; =============== S U B R O U T I N E =======================================
+
+
+GenAscTab       proc near               ; the_explode+CE↑p
+                push    bp
+                push    di
+                push    si
+                push    ds
+                lds     si, ptrDEC
+                mov     dx, 11111111b
+                mov     bx, dx
+
+_ga_loop_1:                             ; GenAscTab+68↓j
+                shl     bx, 1
+                mov     di, cs:ChCodeAsc[bx]
+                shr     bx, 1
+                xor     cl, cl
+                mov     bp, offset sDEC.field_2C1E
+                mov     al, [bx+si+sDEC.field_2F9E]
+                cmp     al, 8
+                jbe     short loc_117
+                test    di, dx
+                jz      short loc_116
+                mov     bp, di
+                and     bp, dx
+                mov     ds:[bp+si+sDEC.field_2C1E], dl
+                mov     cl, 4
+                mov     bp, offset sDEC.field_2D1E
+                test    di, 3Fh
+                jnz     short loc_117
+                mov     cl, 6
+                mov     bp, offset sDEC.field_2E1E
+                mov     dx, 7Fh
+                jmp     short loc_117
+                db 90h
+
+loc_116:                                ; GenAscTab+25↑j
+                mov     cl, 8
+                mov     bp, offset sDEC.field_2E9E
+
+loc_117:                                ; GenAscTab+21↑j
+                                        ; GenAscTab+39↑j ...
+                shr     di, cl
+                sub     al, cl
+                mov     [bx+si+sDEC.field_2F9E], al
+                xchg    ax, cx
+                mov     ax, 1
+                shl     ax, cl
+                add     bp, si
+
+_ga_loop_2:                             ; GenAscTab+62↓j
+                mov     ds:[bp+di], bl
+                add     di, ax
+                cmp     di, dx
+                jbe     short _ga_loop_2 ; ;
+                                        ; ;
+                mov     dx, 11111111b
+                dec     bx
+                jge     short _ga_loop_1 ; ;
+                                        ; ;
+                pop     ds
+                pop     si
+                pop     di
+                pop     bp
+                retn
+GenAscTab       endp
+
+PK_TEXT         ends
+
+
+                end
